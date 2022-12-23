@@ -1,6 +1,5 @@
 ﻿using app.Features.Assignments.Models;
 using app.Features.Assignments.Views;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace app.Features.Assignments;
@@ -53,10 +52,7 @@ public class AssignmentsController
     public AssignmentResponse Get([FromRoute] string id)
     {
         var assignment = _mockDb.FirstOrDefault(x => x.Id == id);
-        if (assignment is null)
-        {
-            return null;
-        }
+        if (assignment is null) return null;
 
         return new AssignmentResponse
         {
@@ -88,12 +84,15 @@ public class AssignmentsController
     }
 
     [HttpPatch("{id}")]
-    public AssignmentResponse UpdateUserById([FromRoute] string id)
+    public AssignmentResponse UpdateUserById([FromRoute] string id,[FromBody] AssignmentRequest request)
     {
         var assignment = _mockDb.FirstOrDefault(user => user.Id == id);
         if (assignment is null) return null;
 
         assignment.Updated = DateTime.UtcNow;
+        assignment.Subject = request.Subject;
+        assignment.Description = request.Description;
+        assignment.Deadline = request.Deadline;
 
         return new AssignmentResponse
         {
