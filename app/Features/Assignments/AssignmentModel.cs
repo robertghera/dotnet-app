@@ -1,9 +1,9 @@
-﻿namespace app.Features.Assignments.Views;
+﻿using app.Base;
 
-public class AssignmentResponse
+namespace app.Features.Assignments;
+
+public class AssignmentModel : Model
 {
-    public string Id { get; set; }
-    
     public string Subject { get; set; }
 
     public string Description { get; set; }

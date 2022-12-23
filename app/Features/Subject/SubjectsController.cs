@@ -4,7 +4,7 @@ namespace app.Features.Subject;
 
 [ApiController]
 [Route("subject")]
-public class SubjectController
+public class SubjectsController
 {
     private static List<SubjectModel> _mockDb = new List<SubjectModel>();
 

@@ -1,12 +1,10 @@
-﻿using app.Features.Assignments.Models;
-using app.Features.Assignments.Views;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace app.Features.Test;
 
 [ApiController]
 [Route("test")]
-public class TestController
+public class TestsController
 {
     private static List<TestModel> _mockDb = new List<TestModel>();
 

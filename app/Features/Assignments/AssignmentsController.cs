@@ -1,6 +1,4 @@
-﻿using app.Features.Assignments.Models;
-using app.Features.Assignments.Views;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace app.Features.Assignments;
 
@@ -67,7 +65,7 @@ public class AssignmentsController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public AssignmentResponse DeleteAssignmentById([FromRoute] string id)
+    public AssignmentResponse Delete([FromRoute] string id)
     {
         var assignment = _mockDb.FirstOrDefault(a => a.Id == id);
         if (assignment is null) return null;
@@ -84,7 +82,7 @@ public class AssignmentsController
     }
 
     [HttpPatch("{id}")]
-    public AssignmentResponse UpdateUserById([FromRoute] string id,[FromBody] AssignmentRequest request)
+    public AssignmentResponse Update([FromRoute] string id,[FromBody] AssignmentRequest request)
     {
         var assignment = _mockDb.FirstOrDefault(user => user.Id == id);
         if (assignment is null) return null;
