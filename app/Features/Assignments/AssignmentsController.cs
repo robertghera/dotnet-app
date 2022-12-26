@@ -62,9 +62,6 @@ public class AssignmentsController
     }
 
     [HttpDelete("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public AssignmentResponse Delete([FromRoute] string id)
     {
         var assignment = _mockDb.FirstOrDefault(a => a.Id == id);
