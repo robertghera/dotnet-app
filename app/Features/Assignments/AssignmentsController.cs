@@ -1,15 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using app.Database;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace app.Features.Assignments;
 
 [ApiController]
 [Route("assignments")]
-public class AssignmentsController
+public class AssignmentsController : ControllerBase
 {
     private static List<AssignmentModel> _mockDb = new List<AssignmentModel>();
+    private AppDbContext dbContext;
+
+    public AssignmentsController(AppDbContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
 
     [HttpPost]
-    public AssignmentResponse Add(AssignmentRequest request)
+    public async Task<AssignmentResponse> Add(AssignmentRequest request)
     {
         var assignment = new AssignmentModel //mapping
         {
@@ -21,21 +30,23 @@ public class AssignmentsController
             Deadline = request.Deadline
         };
 
-        _mockDb.Add(assignment);
-
+        var response = await dbContext.AddAsync(assignment);
+        await dbContext.SaveChangesAsync();
+        
         return new AssignmentResponse
         {
-            Id = assignment.Id,
-            Subject = assignment.Subject,
-            Description = assignment.Description,
-            Deadline = assignment.Deadline
+            Id = response.Entity.Id,
+            Subject = response.Entity.Subject,
+            Description = response.Entity.Description,
+            Deadline = response.Entity.Deadline
         };
     }
 
     [HttpGet]
-    public IEnumerable<AssignmentResponse> Get()
+    public async Task<IEnumerable<AssignmentResponse>> Get()
     {
-        return _mockDb.Select(
+        var entities = await dbContext.Assignments.ToListAsync();
+        return entities.Select(
             assignment => new AssignmentResponse()
             {
                 Id = assignment.Id,
@@ -47,54 +58,57 @@ public class AssignmentsController
     }
 
     [HttpGet("{id}")]
-    public AssignmentResponse Get([FromRoute] string id)
+    public async Task<ActionResult<AssignmentResponse>> Get([FromRoute] string id)
     {
-        var assignment = _mockDb.FirstOrDefault(x => x.Id == id);
-        if (assignment is null) return null;
+        var entity = await dbContext.Assignments.FirstOrDefaultAsync(x => x.Id == id);
+        if (entity is null) return NotFound("Assignment not found");
 
         return new AssignmentResponse
         {
-            Id = assignment.Id,
-            Subject = assignment.Subject,
-            Description = assignment.Description,
-            Deadline = assignment.Deadline
+            Id = entity.Id,
+            Subject = entity.Subject,
+            Description = entity.Description,
+            Deadline = entity.Deadline
         };
     }
 
     [HttpDelete("{id}")]
-    public AssignmentResponse Delete([FromRoute] string id)
+    public async Task<ActionResult<AssignmentResponse>> Delete([FromRoute] string id)
     {
-        var assignment = _mockDb.FirstOrDefault(a => a.Id == id);
-        if (assignment is null) return null;
+        var entity = await dbContext.Assignments.FirstOrDefaultAsync(a => a.Id == id);
+        if (entity is null) return NotFound("Assignment not found");
 
-        _mockDb.Remove(assignment);
+        dbContext.Assignments.Remove(entity);
+        await dbContext.SaveChangesAsync();
 
         return new AssignmentResponse
         {
-            Id = assignment.Id,
-            Subject = assignment.Subject,
-            Description = assignment.Description,
-            Deadline = assignment.Deadline
+            Id = entity.Id,
+            Subject = entity.Subject,
+            Description = entity.Description,
+            Deadline = entity.Deadline
         };
     }
 
     [HttpPatch("{id}")]
-    public AssignmentResponse Update([FromRoute] string id,[FromBody] AssignmentRequest request)
-    {
-        var assignment = _mockDb.FirstOrDefault(user => user.Id == id);
-        if (assignment is null) return null;
+    public async Task<ActionResult<AssignmentResponse>> Update([FromRoute] string id,[FromBody] AssignmentRequest request)
+    {   
+        var entity = await dbContext.Assignments.FirstOrDefaultAsync(a => a.Id == id);
+        if (entity is null) return null;
 
-        assignment.Updated = DateTime.UtcNow;
-        assignment.Subject = request.Subject;
-        assignment.Description = request.Description;
-        assignment.Deadline = request.Deadline;
+        entity.Updated = DateTime.UtcNow;
+        entity.Subject = request.Subject;
+        entity.Description = request.Description;
+        entity.Deadline = request.Deadline;
+
+        await dbContext.SaveChangesAsync();
 
         return new AssignmentResponse
         {
-            Id = assignment.Id,
-            Subject = assignment.Subject,
-            Description = assignment.Description,
-            Deadline = assignment.Deadline
+            Id = entity.Id,
+            Subject = entity.Subject,
+            Description = entity.Description,
+            Deadline = entity.Deadline
         };
     }
 }
